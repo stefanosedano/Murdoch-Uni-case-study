@@ -26,6 +26,21 @@ def clip_to_extent_and_resoultion(in_src, extent, resolution,resampling_method,e
     return array_out
 
 
+def clip_to_extent_resolution_inproj_outproj(in_src, extent,resolution,inproj,outproj):
+
+    # Resample with GDAL warp
+    outDs = gdal.Warp('',
+                      in_src,
+                      srcSRS=inproj,
+                      dstSRS=outproj,
+                      outputBounds=extent,
+                      xRes=resolution, yRes=resolution,
+                      format="MEM")
+
+    array_out = outDs.GetRasterBand(1).ReadAsArray()
+
+    return array_out
+
 def clip_to_extent_resolution(in_src, extent,resolution):
 
     # Resample with GDAL warp
@@ -369,7 +384,18 @@ def get_country_mask_projected(gid_0,res,crs,wkt):
     return minx, miny, maxx, maxy, target_ds,new_geotrans,name_code
 
 
+def clip_to_extent_resolution_projection(in_src, extent,resolution,epsg):
+    # Resample with GDAL warp
+    outDs = gdal.Warp('',
+                      in_src,
+                      dstSRS=epsg,
+                      outputBounds=extent,
+                      xRes=resolution, yRes=resolution,
+                      format="MEM")
 
+    array_out = outDs.GetRasterBand(1).ReadAsArray()
+
+    return array_out
 
 
 def get_country_mask(GID_0_list, res):

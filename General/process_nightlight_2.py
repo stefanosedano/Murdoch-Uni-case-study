@@ -9,10 +9,12 @@ from geojson import Polygon
 from shapely.geometry import shape
 import os, glob
 #ee.Authenticate()
+import subprocess
 credentials = ee.ServiceAccountCredentials(
             "test1-landsat8@geelandsat8.iam.gserviceaccount.com",
-            "google_keys/geelandsat8-6af86334d7ec.json",
+            "C:/Users/email/Documents/German FFO/Murdoch-Uni-case-study/google_keys/geelandsat8-6af86334d7ec.json",
         )
+
 ee.Initialize(credentials)
 from osgeo import gdal, osr
 
@@ -25,7 +27,8 @@ myImg.BANDS = ['b1']
 myImg.SATELLITE = "BNU/FGS/CCNL/v1"
 myImg.SCALE = 1000
 
-for year in range(2000, 2015):
+for year in range(2000, 2014):
+    print(year)
 
     myImg.START_DATE = "{}-01-01".format(year)
     myImg.END_DATE = "{}-12-31".format(year)
@@ -46,5 +49,18 @@ for year in range(2000, 2015):
             os.makedirs(myImg.OUTPATH)
 
         myImg.OUTPATH = "{}/subpart_{}.tif".format(myImg.OUTPATH, counter)
-        myImg.get_image_to_file()
+
+        if not os.path.exists(myImg.OUTPATH):
+            myImg.get_image_to_file()
+
+
+
         counter = counter + 1
+
+        if counter == 2:
+            #build vrt
+            outfile = "C:/Users/email/Documents/German FFO/Murdoch-Uni-case-study/DATA/nightlight_CCNL/{}/index.vrt".format(year)
+            datapath = "C:/Users/email/Documents/German FFO/Murdoch-Uni-case-study/DATA/nightlight_CCNL/{}/*.tif".format(
+                year)
+            out = subprocess.run(
+                ["C:/Program Files/QGIS 3.16/bin/gdalbuildvrt.exe", outfile, datapath], shell=True)

@@ -9,11 +9,11 @@ from geojson import Polygon
 from shapely.geometry import shape
 import os, glob
 #ee.Authenticate()
-credentials = ee.ServiceAccountCredentials(
-            "test1-landsat8@geelandsat8.iam.gserviceaccount.com",
-            "google_keys/geelandsat8-6af86334d7ec.json",
-        )
-ee.Initialize(credentials)
+#credentials = ee.ServiceAccountCredentials(
+#            "test1-landsat8@geelandsat8.iam.gserviceaccount.com",
+#            "google_keys/geelandsat8-6af86334d7ec.json",
+#        )
+#ee.Initialize(credentials)
 from osgeo import gdal, osr
 
 
@@ -55,17 +55,19 @@ class gee:
 
     def get_image_by_country_name(self):
 
-
-
-
-
-
         image = ee.ImageCollection(self.SATELLITE) \
             .filterDate(self.START_DATE, self.END_DATE) \
             .filterBounds(self.REGION)
 
         return image.median().clip(self.REGION)
 
+    def get_image_by_country_name_max(self):
+
+        image = ee.ImageCollection(self.SATELLITE) \
+            .filterDate(self.START_DATE, self.END_DATE) \
+            .filterBounds(self.REGION)
+
+        return image.select('flooded').sum().uint8()
 
 
     def get_image_to_file(self):
@@ -78,10 +80,9 @@ class gee:
         import requests
         image = self.image
         path = image.getDownloadUrl({
-            'bands': self.BANDS,
             'scale': self.SCALE,
             'crs': self.CRS,
-            'region': self.REGION,
+            'region': self.SUB_REGION,
             'format': 'GEO_TIFF'
         })
         response = requests.get(path)
